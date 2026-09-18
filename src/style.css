@@ -1,0 +1,19 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%;
+  background: #0a0a0c;
+  overflow: hidden;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: #e8e6e3;
+}
+#app {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+}
+#game {
+  max-width: 100%; max-height: 100%;
+  image-rendering: pixelated;
+  background: #000;
+  box-shadow: 0 0 60px rgba(188, 30, 34, 0.15);
+  cursor: crosshair;
+}
