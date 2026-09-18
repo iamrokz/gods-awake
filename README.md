@@ -7,6 +7,7 @@ Narratives 2D-Jump-&-Run-Prototyp — duale Formen **Anima** (rot/weiß) und **A
 ## Run / Starten
 
 ```bash
+cd /workspace/gods-awake
 npm install
 npm run dev
 ```
@@ -67,5 +68,5 @@ Art is procedural Canvas (low-poly silhouettes, noir + red accents, region palet
 - Only 2 of 7 regions are full levels (by design for this prototype)
 - No audio / music yet
 - No save system
-- Boss AI is simplified (volley patterns)
-- Parallax is lightweight silhouette layers
+- Boss AI is simplified (volley patterns, no full multi-phase arena scripting)
+- Parallax is lightweight silhouette layers, not full parallax art packs
