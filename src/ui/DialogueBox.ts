@@ -1,5 +1,4 @@
 import type { DialogueLine } from '../core/types';
-import { COLORS } from '../art/draw';
 
 export class DialogueBox {
   active = false;
@@ -7,17 +6,37 @@ export class DialogueBox {
   index = 0;
   charVisible = 0;
   private speed = 42;
+  el: HTMLElement;
+  private speakerEl: HTMLElement;
+  private textEl: HTMLElement;
+
+  constructor(host: HTMLElement) {
+    this.el = document.createElement('div');
+    this.el.id = 'dialogue';
+    this.el.innerHTML = `
+      <div class="dlg-speaker"></div>
+      <div class="dlg-text"></div>
+      <div class="dlg-hint">Enter / E / Space — weiter</div>
+    `;
+    this.el.style.display = 'none';
+    host.appendChild(this.el);
+    this.speakerEl = this.el.querySelector('.dlg-speaker')!;
+    this.textEl = this.el.querySelector('.dlg-text')!;
+  }
 
   open(lines: DialogueLine[]) {
     this.lines = lines;
     this.index = 0;
     this.charVisible = 0;
     this.active = true;
+    this.el.style.display = 'block';
+    this.render();
   }
 
   close() {
     this.active = false;
     this.lines = [];
+    this.el.style.display = 'none';
   }
 
   get current(): DialogueLine | null {
@@ -27,6 +46,7 @@ export class DialogueBox {
   update(dt: number) {
     if (!this.active || !this.current) return;
     this.charVisible += this.speed * dt;
+    this.render();
   }
 
   advance(): boolean {
@@ -34,6 +54,7 @@ export class DialogueBox {
     const full = this.current.text.length;
     if (this.charVisible < full) {
       this.charVisible = full;
+      this.render();
       return false;
     }
     this.index++;
@@ -42,49 +63,17 @@ export class DialogueBox {
       this.close();
       return true;
     }
+    this.render();
     return false;
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
-    if (!this.active || !this.current) return;
-    const line = this.current;
-    const shown = line.text.slice(0, Math.floor(this.charVisible));
-
-    ctx.fillStyle = 'rgba(8,8,12,0.88)';
-    ctx.fillRect(80, 520, 1120, 160);
-    ctx.strokeStyle = COLORS.red;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(80, 520, 1120, 160);
-
-    ctx.fillStyle = COLORS.redSoft;
-    ctx.font = 'bold 16px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(line.speaker, 110, 555);
-
-    ctx.fillStyle = COLORS.white;
-    ctx.font = '18px sans-serif';
-    wrapText(ctx, shown, 110, 590, 1060, 26);
-
-    ctx.fillStyle = 'rgba(232,230,227,0.5)';
-    ctx.font = '12px sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText('Enter / E / Space — weiter', 1180, 665);
+  private render() {
+    if (!this.current) return;
+    this.speakerEl.textContent = this.current.speaker;
+    this.textEl.textContent = this.current.text.slice(0, Math.floor(this.charVisible));
   }
-}
 
-function wrapText(
-  ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxW: number, lineH: number
-) {
-  const words = text.split(' ');
-  let line = '';
-  let yy = y;
-  for (const w of words) {
-    const test = line ? line + ' ' + w : w;
-    if (ctx.measureText(test).width > maxW) {
-      ctx.fillText(line, x, yy);
-      line = w;
-      yy += lineH;
-    } else line = test;
+  destroy() {
+    this.el.remove();
   }
-  if (line) ctx.fillText(line, x, yy);
 }
