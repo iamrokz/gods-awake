@@ -60,7 +60,7 @@ export class PlayScene {
     }
 
     this.world = new GameWorld(canvas, overlay, this.region, level);
-    this.world.cam.snapTo(this.player.cx, -this.player.cy);
+    this.world.cam.snapTo(this.player.cx, -this.player.cy, this.player.facing);
     this.hud = new HUD(overlay);
     this.hud.setRegion(this.region);
     this.dialogue = new DialogueBox(overlay);
@@ -118,6 +118,11 @@ export class PlayScene {
     }
 
     if (this.messageTimer > 0) this.messageTimer -= dt;
+
+    if (input.cameraTogglePressed()) {
+      const mode = this.world.cam.toggleMode();
+      this.hud.showToast(mode === 'third' ? 'Kamera: Third-Person' : 'Kamera: Seite');
+    }
 
     this.player.update(input, this.platforms, dt);
 
@@ -298,7 +303,7 @@ export class PlayScene {
     }
     this.world.pruneProjectiles(alive);
     this.world.syncParticles(this.particles.list);
-    this.world.update(dt, this.player.cx, this.player.cy);
+    this.world.update(dt, this.player.cx, this.player.cy, this.player.facing);
 
     this.hud.update({
       hp: this.player.hp,
@@ -309,6 +314,7 @@ export class PlayScene {
       primaryMax: this.player.form === 'anima' ? 0.4 : 0.32,
       secondaryMax: this.player.form === 'anima' ? 1.2 : 1.0,
       hint: this.messageTimer > 0 ? this.message : nearHint(this),
+      dt,
     });
   }
 
