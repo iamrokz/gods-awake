@@ -289,11 +289,11 @@ export class GameWorld {
       });
     }
     for (const { mesh } of this.laserMeshes) {
+      const on = Math.sin(this.clock * 3) > -0.3;
       mesh.visible = true;
       const beam = mesh.userData.beam as THREE.Mesh;
       if (beam) {
         const m = beam.material as THREE.MeshStandardMaterial;
-        const on = Math.sin(this.clock * 3) > -0.3;
         m.opacity = on ? 0.8 : 0.12;
         m.emissiveIntensity = on ? 1.2 : 0.1;
       }
