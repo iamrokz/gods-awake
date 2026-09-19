@@ -1,8 +1,5 @@
 import type { EnemyDef } from '../core/types';
 import { GRAVITY, MAX_FALL, resolvePlatforms, aabbOverlap, type Body } from '../core/Physics';
-import {
-  drawWatcher, drawMaskentraeger, drawElite, drawDrone, drawBossTausend,
-} from '../art/draw';
 
 export type EnemyType = EnemyDef['type'] | 'gridWarden' | 'tausendGesichter';
 
@@ -62,6 +59,7 @@ export class Enemy implements Body {
 
   get cx() { return this.x + this.w / 2; }
   get cy() { return this.y + this.h / 2; }
+  get time() { return this.t; }
 
   update(dt: number, playerX: number, playerY: number, platforms: { x: number; y: number; w: number; h: number }[]) {
     if (this.dead) return;
@@ -90,11 +88,9 @@ export class Enemy implements Body {
         this.facing = dx > 0 ? 1 : -1;
       } else this.vx = 0;
       this.x += this.vx * dt;
-      // leash in arena
       if (this.x < this.homeX - 220) this.x = this.homeX - 220;
       if (this.x > this.homeX + 220) this.x = this.homeX + 220;
       this.y = this.baseY + Math.sin(this.t * 1.5) * 24;
-      // phase up
       const ratio = this.hp / this.maxHp;
       this.phase = ratio < 0.35 ? 2 : ratio < 0.65 ? 1 : 0;
       if (this.attackCd <= 0) {
@@ -104,7 +100,6 @@ export class Enemy implements Body {
       return null;
     }
 
-    // grounded enemies
     if (dist < 220 && this.type !== 'elite' && this.type !== 'gridWarden') {
       this.state = 'chase';
       this.facing = dx > 0 ? 1 : -1;
@@ -137,7 +132,6 @@ export class Enemy implements Body {
     if (this.vy > MAX_FALL) this.vy = MAX_FALL;
     resolvePlatforms(this, platforms, dt);
 
-    // don't walk off forever — soft leash
     if (Math.abs(this.x - this.homeX) > this.patrol * 2.5 && this.state === 'patrol') {
       this.facing = this.x > this.homeX ? -1 : 1;
     }
@@ -163,28 +157,6 @@ export class Enemy implements Body {
   contactDamage(): number {
     if (this.dead || this.hurtTimer > 0.05) return 0;
     return this.damage;
-  }
-
-  draw(ctx: CanvasRenderingContext2D, sx: number, sy: number) {
-    if (this.dead) return;
-    if (this.flash > 0) ctx.globalAlpha = 0.5;
-    const cx = sx + this.w / 2;
-    const cy = sy + this.h / 2;
-    const ratio = this.hp / this.maxHp;
-    switch (this.type) {
-      case 'watcher':
-        drawWatcher(ctx, cx, cy, this.facing, this.t); break;
-      case 'maskentraeger':
-        drawMaskentraeger(ctx, cx, cy, this.facing, this.t); break;
-      case 'drone':
-        drawDrone(ctx, cx, cy, this.t); break;
-      case 'elite':
-      case 'gridWarden':
-        drawElite(ctx, cx, cy, this.facing, this.t, ratio); break;
-      case 'tausendGesichter':
-        drawBossTausend(ctx, cx, cy, this.t, ratio, this.phase); break;
-    }
-    ctx.globalAlpha = 1;
   }
 }
 
