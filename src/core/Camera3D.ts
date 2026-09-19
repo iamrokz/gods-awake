@@ -59,17 +59,17 @@ export class Camera3D {
     let lookZ: number;
 
     if (this.mode === 'third') {
-      // Behind player along facing, slight over-the-shoulder on Z
-      const behind = 160;
-      const height = 55;
-      const shoulder = 90;
-      const lookAhead = 90;
+      // Behind player along facing; sit outside street front rail (~halfDepth+margin)
+      const behind = 200;
+      const height = 78;
+      const shoulder = 135;
+      const lookAhead = 110;
       const f = this.facingSmooth;
       desiredX = targetX - f * behind;
       desiredY = targetY + height;
       desiredZ = shoulder;
       lookX = targetX + f * lookAhead;
-      lookY = targetY + 20;
+      lookY = targetY + 28;
       lookZ = 0;
     } else {
       // Side mode: lead based on facing (left vs right), not always +80
@@ -129,8 +129,8 @@ export class Camera3D {
     if (!Number.isFinite(facing) || facing === 0) facing = 1;
     this.facingSmooth = facing;
     if (this.mode === 'third') {
-      this.pos.set(targetX - facing * 160, targetY + 55, 90);
-      this.look.set(targetX + facing * 90, targetY + 20, 0);
+      this.pos.set(targetX - facing * 200, targetY + 78, 135);
+      this.look.set(targetX + facing * 110, targetY + 28, 0);
     } else {
       this.pos.set(targetX + facing * 80, targetY + 60, 480);
       this.look.set(targetX, targetY, 0);
