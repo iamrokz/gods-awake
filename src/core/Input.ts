@@ -81,6 +81,10 @@ export class Input {
     return this.pressed('Space') || this.pressed('KeyW') || this.pressed('ArrowUp');
   }
 
+  jumpReleased() {
+    return this.released('Space') || this.released('KeyW') || this.released('ArrowUp');
+  }
+
   primaryPressed() {
     return this.pressed('KeyJ') || (this.mouse.justDown && this.mouse.button === 0);
   }

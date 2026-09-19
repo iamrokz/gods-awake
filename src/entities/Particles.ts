@@ -24,6 +24,15 @@ export class ParticleSystem {
     }
   }
 
+  /** Stronger hit spark for melee / projectile impact juice. */
+  hitBurst(x: number, y: number, color: string, heavy = false) {
+    const n = heavy ? 22 : 16;
+    const speed = heavy ? 320 : 260;
+    this.burst(x, y, color, n, speed);
+    // Secondary white flash sparks
+    this.burst(x, y, '#ffffff', heavy ? 8 : 5, speed * 0.7);
+  }
+
   formSwitch(x: number, y: number, toAnima: boolean) {
     this.burst(x, y, toAnima ? COLORS.redSoft : COLORS.animusGlow, 20, 220);
   }
