@@ -30,6 +30,7 @@ Open the URL Vite prints (default `http://localhost:5173`).
 | Primary attack | `J` or Left mouse |
 | Secondary attack | `K` or Right mouse |
 | Form switch Anima ↔ Animus | `F` or `Tab` |
+| Camera side ↔ third-person | `V` |
 | Interact / Dialogue | `E` |
 | Pause | `Esc` (then `Q` to quit to region select) |
 
@@ -41,7 +42,7 @@ Open the URL Vite prints (default `http://localhost:5173`).
 ## 3D / Camera
 
 - WebGL via **Three.js** (low-poly noir: boxes, spheres, cones, simple compositions)
-- Cinematic **2.5D / side-scroll** third-person camera (follows player on X, perspective depth on Z)
+- Toggleable camera (`V`): cinematic **2.5D / side-scroll** (`Seite`) or true **third-person** follow behind the player (`Third-Person`)
 - HTML overlay HUD (hearts, form, abilities, region, dialogue)
 - Title + region select: dark cinematic HTML/CSS menus
 

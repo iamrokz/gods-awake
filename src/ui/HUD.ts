@@ -10,6 +10,8 @@ export class HUD {
   private regionName: HTMLElement;
   private keywords: HTMLElement;
   private hint: HTMLElement;
+  private toast: HTMLElement;
+  private toastTimer = 0;
 
   constructor(host: HTMLElement) {
     this.el = document.createElement('div');
@@ -28,6 +30,7 @@ export class HUD {
           <div id="hud-keywords"></div>
         </div>
       </div>
+      <div class="hud-toast" id="hud-toast" aria-live="polite"></div>
       <div class="hud-hint" id="hud-hint"></div>
     `;
     host.appendChild(this.el);
@@ -39,6 +42,7 @@ export class HUD {
     this.regionName = this.el.querySelector('#hud-region-name')!;
     this.keywords = this.el.querySelector('#hud-keywords')!;
     this.hint = this.el.querySelector('#hud-hint')!;
+    this.toast = this.el.querySelector('#hud-toast')!;
   }
 
   setRegion(region: RegionDef) {
@@ -47,12 +51,29 @@ export class HUD {
     this.keywords.style.color = region.accent;
   }
 
+  /** Short German HUD toast (e.g. camera mode). Does not block interact hints. */
+  showToast(text: string, duration = 1.6) {
+    this.toast.textContent = text;
+    this.toast.classList.add('show');
+    this.toastTimer = duration;
+  }
+
   update(opts: {
     hp: number; maxHp: number; form: Form;
     primaryCd: number; secondaryCd: number;
     primaryMax: number; secondaryMax: number;
     hint?: string;
+    dt?: number;
   }) {
+    const dt = opts.dt ?? 0;
+    if (this.toastTimer > 0) {
+      this.toastTimer -= dt;
+      if (this.toastTimer <= 0) {
+        this.toast.classList.remove('show');
+        this.toast.textContent = '';
+      }
+    }
+
     let hearts = '';
     for (let i = 0; i < opts.maxHp; i++) {
       hearts += `<span class="heart ${i < opts.hp ? 'on' : 'off'}">♥</span>`;
