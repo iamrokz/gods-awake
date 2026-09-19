@@ -1,8 +1,8 @@
 # Gods Awake: Anima / Animus
 
-Narrative 2D side-view Jump & Run prototype — dual forms **Anima** (red/white) and **Animus** (blue/dark) across Babylon City dream regions.
+Narrative **3D** (Three.js) side-view jump-and-run prototype — dual forms **Anima** (red/white circle) and **Animus** (blue/dark square) across Babylon City dream regions.
 
-Narratives 2D-Jump-&-Run-Prototyp — duale Formen **Anima** (rot/weiß) und **Animus** (blau/dunkel) in den Traumregionen von Babylon City.
+Narratives **3D**-Jump-&-Run-Prototyp (Three.js, low-poly noir) — duale Formen **Anima** (rot/weiß) und **Animus** (blau/dunkel) in den Traumregionen von Babylon City.
 
 ## Run / Starten
 
@@ -35,8 +35,15 @@ Open the URL Vite prints (default `http://localhost:5173`).
 
 ### Forms / Formen
 
-- **Anima** — circle motif, red/white: **Lichtimpuls** (pulse melee) + **Erinnerungsfragmente** (shard projectiles)
-- **Animus** — square motif, blue/dark: **Energieklinge** (blade melee) + **Geometrischer Impuls** (square blast)
+- **Anima** — circle motif, red/white mesh: **Lichtimpuls** (pulse melee) + **Erinnerungsfragmente** (shard projectiles)
+- **Animus** — square motif, blue/dark mesh: **Energieklinge** (blade melee) + **Geometrischer Impuls** (square blast)
+
+## 3D / Camera
+
+- WebGL via **Three.js** (low-poly noir: boxes, spheres, cones, simple compositions)
+- Cinematic **2.5D / side-scroll** third-person camera (follows player on X, perspective depth on Z)
+- HTML overlay HUD (hearts, form, abilities, region, dialogue)
+- Title + region select: dark cinematic HTML/CSS menus
 
 ## Design map / Design-Karte
 
@@ -54,14 +61,14 @@ Open the URL Vite prints (default `http://localhost:5173`).
 Platforms, spike/laser hazards, Watcher + Drone enemies, 3 NPCs (Archivarin, Beamter, Abtrünniger), Elite Grid-Warden mid-boss, exit gate.
 
 ### Media District
-Maskenträger enemies, NPCs (Journalistin, Drucker, Schauspielerin), Erzähler dialogue tease, boss **Die Tausend Gesichter** (multi-face/screens).
+Maskenträger enemies, NPCs (Journalistin, Drucker, Schauspielerin), Erzähler dialogue tease, boss **Die Tausend Gesichter** (orbiting face-screens).
 
-Art is procedural Canvas (low-poly silhouettes, noir + red accents, region palettes). UI/dialogue in **German**.
+UI/dialogue in **German**.
 
 ## Stack
 
-- Vite + TypeScript + HTML5 Canvas (no Phaser)
-- Folder structure: `src/scenes`, `src/entities`, `src/data`, `src/ui`, `src/art`, `src/core`
+- Vite + TypeScript + **Three.js**
+- Folder structure: `src/scenes`, `src/entities`, `src/data`, `src/ui`, `src/art`, `src/core`, `src/world`
 
 ## Known gaps / Bekannte Lücken
 
@@ -69,4 +76,5 @@ Art is procedural Canvas (low-poly silhouettes, noir + red accents, region palet
 - No audio / music yet
 - No save system
 - Boss AI is simplified (volley patterns, no full multi-phase arena scripting)
-- Parallax is lightweight silhouette layers, not full parallax art packs
+- Backdrop is procedural low-poly buildings, not authored art packs
+- Physics remains 2D AABB on the play plane (intentional for side-scroller feel)
