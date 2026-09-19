@@ -220,6 +220,10 @@ html, body {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   z-index: 8; gap: 12px;
 }
+/* `hidden` must win over display:flex or NIEDERLAGE/PAUSE stay visible */
+.overlay-panel[hidden] {
+  display: none !important;
+}
 .overlay-panel h2 { font-size: 36px; letter-spacing: 0.1em; }
 .overlay-panel.death { background: rgba(20,0,0,0.6); }
 .overlay-panel.death h2 { color: #e04548; }
