@@ -1,7 +1,6 @@
 import type { Form, Facing } from '../core/types';
 import { GRAVITY, MAX_FALL, resolvePlatforms, type Body } from '../core/Physics';
 import type { Input } from '../core/Input';
-import { drawPlayer } from '../art/draw';
 
 export class Player implements Body {
   x: number;
@@ -99,7 +98,6 @@ export class Player implements Body {
   getAttackHitbox(): { x: number; y: number; w: number; h: number } | null {
     if (!this.attacking || this.attackKind !== 'primary') return null;
     if (this.form === 'anima') {
-      // Lichtimpuls - circle in front
       const r = 36;
       return {
         x: this.cx + this.facing * 28 - r / 2,
@@ -108,19 +106,12 @@ export class Player implements Body {
         h: r,
       };
     }
-    // Energieklinge - wide slash
     return {
       x: this.facing > 0 ? this.x + this.w : this.x - 48,
       y: this.y + 4,
       w: 48,
       h: 40,
     };
-  }
-
-  wantsProjectile(): { kind: 'fragment' | 'geo'; x: number; y: number; vx: number; vy: number } | null {
-    if (!this.attacking || this.attackKind !== 'secondary' || this.attackTimer > 0.3) return null;
-    // fire once near start — caller should gate with a flag
-    return null;
   }
 
   takeDamage(amount: number) {
@@ -136,15 +127,5 @@ export class Player implements Body {
 
   heal(n: number) {
     this.hp = Math.min(this.maxHp, this.hp + n);
-  }
-
-  draw(ctx: CanvasRenderingContext2D, sx: number, sy: number, t: number) {
-    if (this.dead) {
-      ctx.globalAlpha = 0.4;
-    } else if (this.invuln > 0 && Math.floor(this.invuln * 12) % 2 === 0) {
-      ctx.globalAlpha = 0.45;
-    }
-    drawPlayer(ctx, this.form, sx + this.w / 2, sy + this.h / 2, this.facing, t, this.attacking);
-    ctx.globalAlpha = 1;
   }
 }

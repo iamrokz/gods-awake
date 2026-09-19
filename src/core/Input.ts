@@ -3,24 +3,24 @@ export class Input {
   private justPressed = new Set<string>();
   private justReleased = new Set<string>();
   mouse = { x: 0, y: 0, down: false, justDown: false, justUp: false, button: 0 };
-  private canvas: HTMLCanvasElement;
+  private target: HTMLElement;
 
-  constructor(canvas: HTMLCanvasElement) {
-    this.canvas = canvas;
+  constructor(target: HTMLElement) {
+    this.target = target;
     window.addEventListener('keydown', this.onKeyDown);
     window.addEventListener('keyup', this.onKeyUp);
-    canvas.addEventListener('mousedown', this.onMouseDown);
+    target.addEventListener('mousedown', this.onMouseDown);
     window.addEventListener('mouseup', this.onMouseUp);
-    canvas.addEventListener('mousemove', this.onMouseMove);
-    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+    target.addEventListener('mousemove', this.onMouseMove);
+    target.addEventListener('contextmenu', (e) => e.preventDefault());
   }
 
   destroy() {
     window.removeEventListener('keydown', this.onKeyDown);
     window.removeEventListener('keyup', this.onKeyUp);
-    this.canvas.removeEventListener('mousedown', this.onMouseDown);
+    this.target.removeEventListener('mousedown', this.onMouseDown);
     window.removeEventListener('mouseup', this.onMouseUp);
-    this.canvas.removeEventListener('mousemove', this.onMouseMove);
+    this.target.removeEventListener('mousemove', this.onMouseMove);
   }
 
   private onKeyDown = (e: KeyboardEvent) => {
@@ -52,9 +52,9 @@ export class Input {
   private onMouseMove = (e: MouseEvent) => this.updateMousePos(e);
 
   private updateMousePos(e: MouseEvent) {
-    const r = this.canvas.getBoundingClientRect();
-    const sx = this.canvas.width / r.width;
-    const sy = this.canvas.height / r.height;
+    const r = this.target.getBoundingClientRect();
+    const sx = 1280 / r.width;
+    const sy = 720 / r.height;
     this.mouse.x = (e.clientX - r.left) * sx;
     this.mouse.y = (e.clientY - r.top) * sy;
   }
