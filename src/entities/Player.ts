@@ -23,11 +23,20 @@ export class Player implements Body {
   attacking = false;
   attackKind: 'primary' | 'secondary' | null = null;
   hitIds = new Set<number>();
+  /** Decaying horizontal knockback / impulse — not overwritten by movement. */
+  knockbackVX = 0;
 
   private jumpBuffer = 0;
   private coyote = 0;
+  /** Input-driven horizontal velocity (accel/friction), blended with knockbackVX. */
+  private controlVX = 0;
   readonly speed = 320;
   readonly jumpForce = -720;
+  private readonly groundAccel = 2600;
+  private readonly airAccel = 1400;
+  private readonly groundFriction = 2400;
+  private readonly airFriction = 500;
+  private readonly kbDecay = 10;
 
   constructor(x: number, y: number) {
     this.x = x;
@@ -36,6 +45,12 @@ export class Player implements Body {
 
   get cx() { return this.x + this.w / 2; }
   get cy() { return this.y + this.h / 2; }
+
+  /** Apply damage knockback impulse that persists across frames. */
+  applyKnockback(kx: number, ky: number) {
+    this.knockbackVX = kx;
+    this.vy = ky;
+  }
 
   update(input: Input, platforms: { x: number; y: number; w: number; h: number }[], dt: number) {
     if (this.dead) return;
@@ -58,8 +73,25 @@ export class Player implements Body {
     }
 
     const ax = input.axisX();
-    this.vx = ax * this.speed;
     if (ax !== 0) this.facing = ax > 0 ? 1 : -1;
+
+    // Ground/air acceleration + friction (replaces instant vx snap)
+    const target = ax * this.speed;
+    const accel = this.onGround ? this.groundAccel : this.airAccel;
+    const fric = this.onGround ? this.groundFriction : this.airFriction;
+    if (ax !== 0) {
+      if (this.controlVX < target) this.controlVX = Math.min(target, this.controlVX + accel * dt);
+      else if (this.controlVX > target) this.controlVX = Math.max(target, this.controlVX - accel * dt);
+    } else {
+      if (this.controlVX > 0) this.controlVX = Math.max(0, this.controlVX - fric * dt);
+      else if (this.controlVX < 0) this.controlVX = Math.min(0, this.controlVX + fric * dt);
+    }
+
+    // Knockback decays independently so movement doesn't erase it
+    this.knockbackVX *= Math.exp(-this.kbDecay * dt);
+    if (Math.abs(this.knockbackVX) < 4) this.knockbackVX = 0;
+
+    this.vx = this.controlVX + this.knockbackVX;
 
     if (this.onGround) this.coyote = 0.1;
     else this.coyote -= dt;
@@ -72,6 +104,11 @@ export class Player implements Body {
       this.jumpBuffer = 0;
       this.coyote = 0;
       this.onGround = false;
+    }
+
+    // Variable jump: cut upward velocity on release
+    if (input.jumpReleased() && this.vy < 0) {
+      this.vy *= 0.42;
     }
 
     this.vy += GRAVITY * dt;
