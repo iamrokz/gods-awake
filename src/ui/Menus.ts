@@ -33,6 +33,7 @@ Springen / Jump         Leertaste / W / ↑
 Primärangriff           J  oder  Linksklick
 Sekundärangriff         K  oder  Rechtsklick
 Form wechseln           F  oder  Tab   (Anima ↔ Animus)
+Kamera Seite/Third      V
 Interagieren / Talk     E
 Pause                   Esc
 
