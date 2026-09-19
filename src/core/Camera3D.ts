@@ -46,7 +46,7 @@ export class Camera3D {
     if (!Number.isFinite(targetX) || !Number.isFinite(targetY)) return;
     if (!Number.isFinite(facing) || facing === 0) facing = this.facingSmooth || 1;
 
-    // Smooth facing so rapid left/right doesn't whip the third-person cam
+    // Smooth facing so rapid left/right doesn't whip the cam
     const faceLerp = 1 - Math.pow(0.002, Math.max(dt, 1e-4));
     this.facingSmooth += (facing - this.facingSmooth) * faceLerp;
     if (Math.abs(this.facingSmooth) < 0.05) this.facingSmooth = facing;
@@ -72,10 +72,12 @@ export class Camera3D {
       lookY = targetY + 20;
       lookZ = 0;
     } else {
-      desiredX = targetX + 80;
+      // Side mode: lead based on facing (left vs right), not always +80
+      const lead = 80;
+      const f = this.facingSmooth;
+      desiredX = targetX + f * lead;
       desiredY = targetY + 60;
       desiredZ = 480;
-      // look computed after lerp/clamp (matches original side cam)
       lookX = 0;
       lookY = 0;
       lookZ = 0;
@@ -103,7 +105,8 @@ export class Camera3D {
     }
 
     if (this.mode === 'side') {
-      lookX = this.pos.x - 40;
+      const f = this.facingSmooth;
+      lookX = this.pos.x - f * 40;
       lookY = this.pos.y - 20;
       lookZ = 0;
     }
@@ -129,7 +132,7 @@ export class Camera3D {
       this.pos.set(targetX - facing * 160, targetY + 55, 90);
       this.look.set(targetX + facing * 90, targetY + 20, 0);
     } else {
-      this.pos.set(targetX + 80, targetY + 60, 480);
+      this.pos.set(targetX + facing * 80, targetY + 60, 480);
       this.look.set(targetX, targetY, 0);
     }
     this.camera.position.copy(this.pos);
