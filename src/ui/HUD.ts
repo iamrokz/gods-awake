@@ -11,6 +11,9 @@ export class HUD {
   private keywords: HTMLElement;
   private hint: HTMLElement;
   private toast: HTMLElement;
+  private bossEl: HTMLElement;
+  private bossName: HTMLElement;
+  private bossFill: HTMLElement;
   private toastTimer = 0;
 
   constructor(host: HTMLElement) {
@@ -30,6 +33,12 @@ export class HUD {
           <div id="hud-keywords"></div>
         </div>
       </div>
+      <div class="hud-boss" id="hud-boss" hidden>
+        <div class="hud-boss-label">BOSS</div>
+        <div class="hud-boss-name" id="hud-boss-name">Tausend Gesichter</div>
+        <div class="hud-boss-bar"><div class="hud-boss-fill" id="hud-boss-fill"></div></div>
+        <div class="hud-boss-hp" id="hud-boss-hp"></div>
+      </div>
       <div class="hud-toast" id="hud-toast" aria-live="polite"></div>
       <div class="hud-hint" id="hud-hint"></div>
     `;
@@ -43,6 +52,9 @@ export class HUD {
     this.keywords = this.el.querySelector('#hud-keywords')!;
     this.hint = this.el.querySelector('#hud-hint')!;
     this.toast = this.el.querySelector('#hud-toast')!;
+    this.bossEl = this.el.querySelector('#hud-boss')!;
+    this.bossName = this.el.querySelector('#hud-boss-name')!;
+    this.bossFill = this.el.querySelector('#hud-boss-fill')!;
   }
 
   setRegion(region: RegionDef) {
@@ -64,6 +76,7 @@ export class HUD {
     primaryMax: number; secondaryMax: number;
     hint?: string;
     dt?: number;
+    boss?: { name: string; hp: number; maxHp: number } | null;
   }) {
     const dt = opts.dt ?? 0;
     if (this.toastTimer > 0) {
@@ -101,6 +114,17 @@ export class HUD {
 
     this.hint.textContent = opts.hint ?? '';
     this.hint.style.opacity = opts.hint ? '1' : '0';
+
+    if (opts.boss && opts.boss.hp > 0) {
+      this.bossEl.hidden = false;
+      this.bossName.textContent = opts.boss.name;
+      const pct = Math.max(0, Math.min(1, opts.boss.hp / opts.boss.maxHp)) * 100;
+      this.bossFill.style.width = `${pct}%`;
+      const hpEl = this.el.querySelector('#hud-boss-hp')!;
+      hpEl.textContent = `TP ${Math.ceil(opts.boss.hp)} / ${opts.boss.maxHp}`;
+    } else {
+      this.bossEl.hidden = true;
+    }
   }
 
   show(v: boolean) {
