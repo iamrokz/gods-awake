@@ -82,6 +82,35 @@ html, body {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+
+.hud-boss {
+  position: absolute; top: 64px; left: 50%; transform: translateX(-50%);
+  width: min(420px, 70%);
+  text-align: center;
+  pointer-events: none;
+}
+.hud-boss-label {
+  font-size: 10px; letter-spacing: 0.2em; color: #e04548; font-weight: 700;
+  margin-bottom: 2px;
+}
+.hud-boss-name {
+  font-size: 15px; font-weight: 700; letter-spacing: 0.04em;
+  text-shadow: 0 2px 8px #000; margin-bottom: 6px;
+}
+.hud-boss-bar {
+  height: 10px; background: rgba(20,8,10,0.85);
+  border: 1px solid #bc1e22; overflow: hidden;
+}
+.hud-boss-fill {
+  height: 100%; width: 100%;
+  background: linear-gradient(90deg, #7a1014, #e04548 55%, #ff8a8c);
+  box-shadow: 0 0 10px rgba(188,30,34,0.55);
+  transition: width 0.12s ease-out;
+}
+.hud-boss-hp {
+  font-size: 11px; color: rgba(232,230,227,0.7); margin-top: 4px;
+}
+
 .hud-hint {
   position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
   font-size: 14px; color: rgba(232,230,227,0.9);
