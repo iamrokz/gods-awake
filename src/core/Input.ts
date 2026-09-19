@@ -91,6 +91,7 @@ export class Input {
 
   interactPressed() { return this.pressed('KeyE'); }
   formSwitchPressed() { return this.pressed('KeyF') || this.pressed('Tab'); }
+  cameraTogglePressed() { return this.pressed('KeyV'); }
   pausePressed() { return this.pressed('Escape'); }
   confirmPressed() {
     return this.pressed('Enter') || this.pressed('Space') || this.pressed('KeyE');
