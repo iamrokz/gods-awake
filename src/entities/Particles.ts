@@ -1,6 +1,6 @@
-import { COLORS } from '../art/draw';
+import { COLORS } from '../art/colors';
 
-interface Particle {
+export interface Particle {
   x: number; y: number; vx: number; vy: number;
   life: number; max: number; color: string; size: number;
 }
@@ -36,14 +36,5 @@ export class ParticleSystem {
       p.life -= dt;
     }
     this.list = this.list.filter((p) => p.life > 0);
-  }
-
-  draw(ctx: CanvasRenderingContext2D, camX: number, camY: number) {
-    for (const p of this.list) {
-      ctx.globalAlpha = p.life / p.max;
-      ctx.fillStyle = p.color;
-      ctx.fillRect(p.x - camX, p.y - camY, p.size, p.size);
-    }
-    ctx.globalAlpha = 1;
   }
 }
