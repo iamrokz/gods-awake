@@ -67,6 +67,10 @@ export interface LevelDef {
   elite?: EnemyDef;
   boss?: { x: number; y: number; type: 'gridWarden' | 'tausendGesichter' };
   parallax?: string;
+  /** Visual street width on Z (play plane at z=0). Default ~100. Collision stays 2D. */
+  streetDepth?: number;
+  /** Back-facade wall height above platform top. Default ~160. */
+  wallHeight?: number;
 }
 
 export interface DialogueLine {

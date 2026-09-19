@@ -7,6 +7,8 @@ export const CIVIC_GRID: LevelDef = {
   spawn: { x: 80, y: 620 },
   exit: { x: 4550, y: 520 },
   parallax: 'civic',
+  streetDepth: 110,
+  wallHeight: 170,
   platforms: [
     // ground sections with gaps
     { x: 0, y: 760, w: 700, h: 140 },

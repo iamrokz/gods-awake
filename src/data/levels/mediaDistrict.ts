@@ -7,6 +7,8 @@ export const MEDIA_DISTRICT: LevelDef = {
   spawn: { x: 100, y: 620 },
   exit: { x: 4900, y: 480 },
   parallax: 'media',
+  streetDepth: 120,
+  wallHeight: 180,
   platforms: [
     { x: 0, y: 760, w: 600, h: 140 },
     { x: 700, y: 760, w: 450, h: 140 },
