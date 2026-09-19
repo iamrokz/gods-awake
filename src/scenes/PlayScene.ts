@@ -37,6 +37,9 @@ export class PlayScene {
   private pauseEl: HTMLElement;
   private deathEl: HTMLElement;
   private host: HTMLElement;
+  /** Tiny hitstop (1–2 frames worth). */
+  private hitstop = 0;
+  private meleeHitIds = new Set<number>();
 
   constructor(regionId: number, canvas: HTMLCanvasElement, overlay: HTMLElement) {
     this.host = overlay;
@@ -78,8 +81,18 @@ export class PlayScene {
     overlay.appendChild(this.deathEl);
   }
 
+  private triggerHitstop(frames = 2) {
+    this.hitstop = Math.max(this.hitstop, frames / 60);
+  }
+
   update(dt: number, input: Input): PlayResult {
     this.t += dt;
+
+    if (this.hitstop > 0) {
+      this.hitstop -= dt;
+      this.syncWorld(0);
+      return null;
+    }
 
     if (this.completeTimer >= 0) {
       this.completeTimer -= dt;
@@ -143,12 +156,10 @@ export class PlayScene {
           this.player.hitIds.add(e.id);
           const dmg = this.player.form === 'anima' ? 1 : 2;
           e.takeDamage(dmg);
-          this.particles.burst(
-            e.cx, e.cy,
-            this.player.form === 'anima' ? COLORS.redSoft : COLORS.animusGlow,
-            8, 160
-          );
-          this.world.cam.addShake(0.3);
+          const col = this.player.form === 'anima' ? COLORS.redSoft : COLORS.animusGlow;
+          this.particles.hitBurst(e.cx, e.cy, col, true);
+          this.world.cam.addShake(0.55);
+          this.triggerHitstop(2);
         }
       }
     }
@@ -190,14 +201,38 @@ export class PlayScene {
         }));
       }
 
+      // Elite / gridWarden melee hitbox (active after telegraph + lunge)
+      const melee = e.getMeleeHitbox();
+      if (melee) {
+        const key = e.id;
+        if (
+          aabbOverlap(melee, {
+            x: this.player.x + 4, y: this.player.y + 4,
+            w: this.player.w - 8, h: this.player.h - 8,
+          }) &&
+          !this.meleeHitIds.has(key)
+        ) {
+          this.meleeHitIds.add(key);
+          if (this.player.takeDamage(e.damage)) {
+            this.world.cam.addShake(1.0);
+            this.player.applyKnockback(Math.sign(this.player.cx - e.cx) * 340, -360);
+            this.particles.hitBurst(this.player.cx, this.player.cy, COLORS.redSoft, true);
+            this.triggerHitstop(2);
+          }
+        }
+      } else {
+        this.meleeHitIds.delete(e.id);
+      }
+
       if (aabbOverlap(
         { x: this.player.x + 4, y: this.player.y + 4, w: this.player.w - 8, h: this.player.h - 8 },
         e.hitbox()
       )) {
+        // Skip passive overlap damage during active melee window (hitbox handles it)
+        if (e.meleeActive > 0) continue;
         if (this.player.takeDamage(e.contactDamage() || e.damage)) {
           this.world.cam.addShake(0.8);
-          this.player.vx = Math.sign(this.player.cx - e.cx) * 280;
-          this.player.vy = -320;
+          this.player.applyKnockback(Math.sign(this.player.cx - e.cx) * 280, -320);
         }
       }
     }
@@ -214,7 +249,10 @@ export class PlayScene {
           )) {
             e.takeDamage(p.damage);
             p.dead = true;
-            this.particles.burst(p.x, p.y, p.kind === 'geo' ? COLORS.animusGlow : COLORS.redSoft, 6);
+            const col = p.kind === 'geo' ? COLORS.animusGlow : COLORS.redSoft;
+            this.particles.hitBurst(p.x, p.y, col, p.kind === 'geo');
+            this.world.cam.addShake(0.4);
+            this.triggerHitstop(1);
             break;
           }
         }
@@ -225,6 +263,10 @@ export class PlayScene {
         )) {
           if (this.player.takeDamage(p.damage)) {
             this.world.cam.addShake(0.5);
+            this.player.applyKnockback(
+              Math.sign(p.vx || 1) * 180,
+              -200
+            );
           }
           p.dead = true;
         }
@@ -242,7 +284,7 @@ export class PlayScene {
       )) {
         if (this.player.takeDamage(h.damage ?? 1)) {
           this.world.cam.addShake(0.6);
-          this.player.vy = -400;
+          this.player.applyKnockback(this.player.facing * -120, -400);
         }
       }
     }
@@ -293,7 +335,10 @@ export class PlayScene {
     );
 
     for (const e of this.enemies) {
-      this.world.syncEnemy(e.id, e.type, e.x, e.y, e.w, e.h, e.facing, e.dead, e.time);
+      this.world.syncEnemy(
+        e.id, e.type, e.x, e.y, e.w, e.h, e.facing, e.dead, e.time,
+        e.flash, e.telegraph
+      );
     }
 
     const alive = new Set<object>();
@@ -305,6 +350,9 @@ export class PlayScene {
     this.world.syncParticles(this.particles.list);
     this.world.update(dt, this.player.cx, this.player.cy, this.player.facing);
 
+    const boss = this.enemies.find((e) => e.type === 'tausendGesichter' && !e.dead);
+    const fightingBoss = boss && Math.abs(boss.cx - this.player.cx) < 1000;
+
     this.hud.update({
       hp: this.player.hp,
       maxHp: this.player.maxHp,
@@ -315,6 +363,9 @@ export class PlayScene {
       secondaryMax: this.player.form === 'anima' ? 1.2 : 1.0,
       hint: this.messageTimer > 0 ? this.message : nearHint(this),
       dt,
+      boss: fightingBoss && boss
+        ? { name: 'Tausend Gesichter', hp: boss.hp, maxHp: boss.maxHp }
+        : null,
     });
   }
 
@@ -324,6 +375,9 @@ export class PlayScene {
 
   private spawnSecondary() {
     const f = this.player.facing;
+    const col = this.player.form === 'anima' ? COLORS.redSoft : COLORS.animusGlow;
+    this.particles.burst(this.player.cx + f * 24, this.player.cy, col, 14, 200);
+    this.world.cam.addShake(0.25);
     if (this.player.form === 'anima') {
       for (let i = -1; i <= 1; i++) {
         this.projectiles.push(new Projectile({
