@@ -2,12 +2,13 @@ import * as THREE from 'three';
 import type { LevelDef, RegionDef, Form } from '../core/types';
 import { Camera3D } from '../core/Camera3D';
 import {
-  createPlayerRoot, setPlayerForm, createPlatformMesh, createSpikesMesh,
+  createPlayerRoot, setPlayerForm, createSpikesMesh,
   createLaserMesh, createExitMesh, createNpcMesh, createWatcherMesh,
   createMaskentraegerMesh, createEliteMesh, createDroneMesh,
   createBossTausendMesh, createProjectileMesh, createAttackVfx,
   createCityBackdrop, createParticleMesh,
 } from '../art/meshes';
+import { createStreetscape } from '../art/streetscape';
 import { COLORS, hexToInt } from '../art/colors';
 import { center3 } from '../core/coords';
 
@@ -46,7 +47,7 @@ export class GameWorld {
     this.renderer.toneMappingExposure = 1.05;
 
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2(hexToInt(region.bg), 0.00115);
+    this.scene.fog = new THREE.FogExp2(hexToInt(region.bg), 0.00105);
 
     this.cam = new Camera3D(1280 / 720);
     this.root = new THREE.Group();
@@ -64,10 +65,10 @@ export class GameWorld {
     key.shadow.mapSize.set(1024, 1024);
     key.shadow.camera.near = 50;
     key.shadow.camera.far = 2000;
-    key.shadow.camera.left = -400;
-    key.shadow.camera.right = 400;
-    key.shadow.camera.top = 400;
-    key.shadow.camera.bottom = -400;
+    key.shadow.camera.left = -500;
+    key.shadow.camera.right = 500;
+    key.shadow.camera.top = 500;
+    key.shadow.camera.bottom = -500;
     this.scene.add(key);
 
     const rim = new THREE.PointLight(hexToInt(COLORS.red), 1.4, 900, 2);
@@ -86,14 +87,8 @@ export class GameWorld {
     // backdrop
     this.root.add(createCityBackdrop(level.width, region.id));
 
-    // platforms
-    for (const p of level.platforms) {
-      const depth = Math.min(56, 28 + p.h * 0.4);
-      const mesh = createPlatformMesh(p.w, p.h, depth, region);
-      const c = center3(p.x, p.y, p.w, p.h, 0);
-      mesh.position.set(c.x, c.y, c.z);
-      this.root.add(mesh);
-    }
+    // streets / plazas with real Z depth + side architecture
+    this.root.add(createStreetscape(level, region));
 
     // hazards
     for (const h of level.hazards) {
