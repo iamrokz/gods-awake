@@ -279,9 +279,13 @@ export function createPlatformMesh(w: number, h: number, depth: number, region: 
   const g = new THREE.Group();
   const body = box(w, h, depth, region.mid);
   g.add(body);
-  const top = box(w, 3, depth + 2, region.accent, { emissive: region.accent, emissiveIntensity: 0.2 });
-  top.position.y = h / 2 - 1.5;
+  const top = box(w, 4, depth + 4, region.accent, { emissive: region.accent, emissiveIntensity: 0.18 });
+  top.position.y = h / 2 - 2;
   g.add(top);
+  // Bevel lip so thick floors read as ledges from third-person
+  const lip = box(w + 2, 2, depth + 6, region.mid);
+  lip.position.y = h / 2 - 0.5;
+  g.add(lip);
   return g;
 }
 
@@ -289,21 +293,25 @@ export function createSpikesMesh(w: number, h: number): THREE.Group {
   const g = new THREE.Group();
   const n = Math.max(2, Math.floor(w / 16));
   const sw = w / n;
-  for (let i = 0; i < n; i++) {
-    const spike = new THREE.Mesh(
-      new THREE.ConeGeometry(sw * 0.4, h, 4),
-      mat('#4a4a50', { emissive: COLORS.red, emissiveIntensity: 0.15 })
-    );
-    spike.position.set(-w / 2 + sw * i + sw / 2, 0, 0);
-    spike.castShadow = true;
-    g.add(spike);
+  // Extra Z rows so pits read as street-wide traps in third-person
+  const zRows = [-28, 0, 28];
+  for (const zz of zRows) {
+    for (let i = 0; i < n; i++) {
+      const spike = new THREE.Mesh(
+        new THREE.ConeGeometry(sw * 0.35, h, 4),
+        mat('#4a4a50', { emissive: COLORS.red, emissiveIntensity: 0.15 })
+      );
+      spike.position.set(-w / 2 + sw * i + sw / 2, 0, zz);
+      spike.castShadow = true;
+      g.add(spike);
+    }
   }
   return g;
 }
 
 export function createLaserMesh(w: number, h: number): THREE.Group {
   const g = new THREE.Group();
-  const beam = box(Math.max(w, 8), Math.max(h, 8), 6, COLORS.red, {
+  const beam = box(Math.max(w, 8), Math.max(h, 8), 28, COLORS.red, {
     emissive: COLORS.redSoft,
     emissiveIntensity: 0.9,
   });
@@ -317,7 +325,7 @@ export function createLaserMesh(w: number, h: number): THREE.Group {
 
 export function createExitMesh(accent: string): THREE.Group {
   const g = new THREE.Group();
-  const frame = box(48, 64, 8, accent, { emissive: accent, emissiveIntensity: 0.35 });
+  const frame = box(48, 64, 24, accent, { emissive: accent, emissiveIntensity: 0.35 });
   (frame.material as THREE.MeshStandardMaterial).transparent = true;
   (frame.material as THREE.MeshStandardMaterial).opacity = 0.55;
   g.add(frame);
@@ -377,20 +385,20 @@ export function createCityBackdrop(levelW: number, regionId: number): THREE.Grou
     const bh = 180 + ((i * 47) % 220);
     const bw = 70 + (i % 3) * 25;
     const building = box(bw, bh, 60, i % 2 === 0 ? baseColor : midColor);
-    building.position.set(bx, -760 + bh / 2 + 40, -90 - (i % 4) * 30);
+    building.position.set(bx, -760 + bh / 2 + 40, -160 - (i % 4) * 40);
     building.receiveShadow = true;
     building.castShadow = false;
     g.add(building);
 
     if (i % 3 === 0) {
       const banner = box(10, 60 + (i % 2) * 40, 2, COLORS.red, { emissive: COLORS.red, emissiveIntensity: 0.3 });
-      banner.position.set(bx, -760 + bh - 40, -58);
+      banner.position.set(bx, -760 + bh - 40, -128);
       g.add(banner);
     }
 
     if (isMedia && i % 2 === 0) {
       const screen = box(bw * 0.55, 40, 3, COLORS.red, { emissive: COLORS.redSoft, emissiveIntensity: 0.55 });
-      screen.position.set(bx, -760 + bh - 80, -58);
+      screen.position.set(bx, -760 + bh - 80, -128);
       g.add(screen);
     }
   }
@@ -400,13 +408,13 @@ export function createCityBackdrop(levelW: number, regionId: number): THREE.Grou
     const bx = i * 260;
     const bh = 280 + ((i * 73) % 200);
     const building = box(120, bh, 40, isMedia ? '#0e0612' : '#0e1016');
-    building.position.set(bx, -760 + bh / 2 + 60, -200);
+    building.position.set(bx, -760 + bh / 2 + 60, -280);
     g.add(building);
   }
 
   // ground plane strip for visual floor
-  const ground = box(levelW + 400, 8, 200, isMedia ? '#0a0810' : '#0a0a0c');
-  ground.position.set(levelW / 2, -768, -40);
+  const ground = box(levelW + 400, 8, 320, isMedia ? '#0a0810' : '#0a0a0c');
+  ground.position.set(levelW / 2, -768, -80);
   ground.receiveShadow = true;
   g.add(ground);
 
